@@ -2,7 +2,7 @@
 name = "ytnef_sys"
 version = "0.1.0"
 authors = ["Alec Hussey <alec.hussey@madsoft.org>"]
-license = "MIT"
+license = "GPL-2.0-or-later"
 description = "An FFI interface to libytnef. A C library used for parsing the TNEF file format."
 keywords = ["ytnef","binding"]
 categories = ["external-ffi-bindings"]
