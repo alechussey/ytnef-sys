@@ -301,8 +301,10 @@ int TNEFFromHandler STD_ARGLIST {
 }
 // -----------------------------------------------------------------------------
 int TNEFSubjectHandler STD_ARGLIST {
-  if (TNEF->subject.data)
+  if (TNEF->subject.data) {
     free(TNEF->subject.data);
+    TNEF->subject.data = NULL;
+  }
 
   PREALLOCCHECK(size, 100);
   TNEF->subject.data = calloc(size+1, sizeof(BYTE));
@@ -335,6 +337,10 @@ int TNEFRendData STD_ARGLIST {
 int TNEFVersion STD_ARGLIST {
   WORD major;
   WORD minor;
+  if (size != 2 * sizeof(WORD)) {
+    printf("Incorrect size of version field, suspected corruption\n");
+    return -1;
+  }
   minor = SwapWord((BYTE*)data, size);
   major = SwapWord((BYTE*)data + 2, size - 2);
 
@@ -520,7 +526,7 @@ int TNEFFillMapi(TNEFStruct *TNEF, BYTE *data, DWORD size, MAPIProps *p) {
         // now actual object
         if (vl->size != 0) {
           SIZECHECK(vl->size);
-          PREALLOCCHECK(vl->size, 100000);
+          PREALLOCCHECK(vl->size, 524288);
           if (PROP_TYPE(mp->id) == PT_UNICODE) {
             vl->data =(BYTE*) to_utf8(vl->size, (char*)d);
             if(vl->data == NULL)
@@ -961,6 +967,7 @@ void TNEFInitialize(TNEFStruct *TNEF) {
   TNEF->IO.InitProc = NULL;
   TNEF->IO.ReadProc = NULL;
   TNEF->IO.CloseProc = NULL;
+  TNEF->attachmentSize = 50;
 }
 #undef INITVARLENGTH
 #undef INITDTR
@@ -1180,7 +1187,7 @@ int TNEFParse(TNEFStruct *TNEF) {
       printf("ERROR: Field with size of 0\n");
       return YTNEF_ERROR_READING_DATA;
     }
-    PREALLOCCHECK(size, 1000000);
+    PREALLOCCHECK(size, TNEF->attachmentSize*1024*1024);
     data = calloc(size, sizeof(BYTE));
     ALLOCCHECK(data);
     if (TNEFRawRead(TNEF, data, size, &header_checksum) < 0) {
