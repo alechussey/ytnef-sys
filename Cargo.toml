@@ -1,6 +1,6 @@
 [package]
 name = "ytnef_sys"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Alec Hussey <alec.hussey@madsoft.org>"]
 license = "GPL-2.0-or-later"
 description = "An FFI interface to libytnef. A C library used for parsing the TNEF file format."
@@ -15,4 +15,4 @@ build = "build.rs"
 
 [build-dependencies]
 cc = "1.0"
-bindgen = "0.59"
+bindgen = "0.69"

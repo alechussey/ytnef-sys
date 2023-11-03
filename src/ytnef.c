@@ -306,7 +306,7 @@ int TNEFSubjectHandler STD_ARGLIST {
     TNEF->subject.data = NULL;
   }
 
-  PREALLOCCHECK(size, 100);
+  PREALLOCCHECK(size, 1000);
   TNEF->subject.data = calloc(size+1, sizeof(BYTE));
   ALLOCCHECK(TNEF->subject.data);
   TNEF->subject.size = size;
@@ -526,7 +526,7 @@ int TNEFFillMapi(TNEFStruct *TNEF, BYTE *data, DWORD size, MAPIProps *p) {
         // now actual object
         if (vl->size != 0) {
           SIZECHECK(vl->size);
-          PREALLOCCHECK(vl->size, 524288);
+          PREALLOCCHECK(vl->size, 10485760);
           if (PROP_TYPE(mp->id) == PT_UNICODE) {
             vl->data =(BYTE*) to_utf8(vl->size, (char*)d);
             if(vl->data == NULL)
@@ -608,7 +608,7 @@ int TNEFFillMapi(TNEFStruct *TNEF, BYTE *data, DWORD size, MAPIProps *p) {
         if (TNEF->subject.size == 0) {
           int i;
           DEBUG(TNEF->Debug, 3, "Assigning a Subject");
-          PREALLOCCHECK(vl->size, 100);
+          PREALLOCCHECK(vl->size, 1000);
           TNEF->subject.data = calloc(vl->size+1, sizeof(BYTE));
           ALLOCCHECK(TNEF->subject.data);
           TNEF->subject.size = vl->size;
@@ -783,7 +783,7 @@ int TNEFAttachmentFilename STD_ARGLIST {
   while (p->next != NULL) p = p->next;
 
   p->Title.size = size;
-  PREALLOCCHECK(size, 100);
+  PREALLOCCHECK(size, 260);
   p->Title.data = calloc(size+1, sizeof(BYTE));
   ALLOCCHECK(p->Title.data);
   memcpy(p->Title.data, data, size);
@@ -1557,6 +1557,8 @@ BYTE *DecompressRTF(variableLength *p, int *size) {
     dst = calloc(uncompressedSize, 1);
     ALLOCCHECK_CHAR(dst);
     memcpy(dst, src + 4, uncompressedSize);
+    free(comp_Prebuf.data);
+    return dst;
   } else if (magic == 0x75465a4c) {
     // magic number that identifies the stream as a compressed stream
     int flagCount = 0;
